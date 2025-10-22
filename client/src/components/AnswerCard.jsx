@@ -1,0 +1,1 @@
+// Placeholder for AnswerCard.jsx
