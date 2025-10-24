@@ -1,18 +1,45 @@
-import { useEffect, useState } from "react";
-import api from "./utils/api.js";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useContext } from "react";
+import AuthContext from "./context/AuthContext.jsx";
 
-function App() {
-  const [msg, setMsg] = useState("");
+// Pages
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+import AskQuestion from "./pages/AskQuestion.jsx";
+import QuestionFeed from "./pages/QuestionFeed.jsx";
+import QuestionDetail from "./pages/QuestionDetail.jsx";
 
-  useEffect(() => {
-    api.get("/").then(res => setMsg(res.data));
-  }, []);
+// Components
+import Navbar from "./components/Navbar.jsx";
+
+export default function App() {
+  const { user } = useContext(AuthContext);
 
   return (
-    <div className="flex justify-center items-center h-screen text-2xl text-eggplant">
-      {msg || "Loading..."}
-    </div>
+    <Router>
+      <Navbar />
+      <div className="min-h-screen bg-pearl text-eggplant">
+        <Routes>
+          {/* Redirect root */}
+          <Route path="/" element={<Navigate to={user ? "/feed" : "/login"} />} />
+
+          {/* Auth Pages */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* Protected Pages */}
+          {user && (
+            <>
+              <Route path="/feed" element={<QuestionFeed />} />
+              <Route path="/ask" element={<AskQuestion />} />
+              <Route path="/question/:id" element={<QuestionDetail />} />
+            </>
+          )}
+
+          {/* Catch-all route */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
-
-export default App;

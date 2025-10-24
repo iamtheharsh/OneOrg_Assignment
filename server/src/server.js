@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import questionRoutes from "./routes/questionRoutes.js";
+import answerRoutes from "./routes/answerRoutes.js";
 
 
 dotenv.config();
@@ -12,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/auth", authRoutes);
 app.use("/questions", questionRoutes);
-
+app.use("/answers", answerRoutes);
 
 
 // Sample route
