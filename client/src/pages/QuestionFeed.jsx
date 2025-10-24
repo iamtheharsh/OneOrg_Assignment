@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { Link } from "react-router-dom";
 import api from "../utils/api";
 import { AuthContext } from "../context/AuthProvider.jsx";
@@ -8,8 +8,8 @@ export default function QuestionFeed() {
   const [questions, setQuestions] = useState([]);
   const [search, setSearch] = useState("");
 
-  // Fetch all questions
-  const fetchQuestions = async () => {
+  // ✅ Memoize fetchQuestions to prevent infinite re-renders
+  const fetchQuestions = useCallback(async () => {
     try {
       const { data } = await api.get(`/questions?search=${search}`, {
         headers: { Authorization: `Bearer ${user.token}` },
@@ -18,11 +18,12 @@ export default function QuestionFeed() {
     } catch (err) {
       console.error("❌ Error fetching questions:", err.response?.data || err.message);
     }
-  };
+  }, [search, user.token]);
 
+  // ✅ Add fetchQuestions to dependency array safely
   useEffect(() => {
     fetchQuestions();
-  }, [search]);
+  }, [fetchQuestions]);
 
   return (
     <div className="p-6 text-eggplant">
