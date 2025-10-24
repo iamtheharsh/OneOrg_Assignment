@@ -1,18 +1,16 @@
 import Question from "../models/Question.js";
 
-// POST /questions - create new question
+// ➕ Create
 export const createQuestion = async (req, res) => {
   try {
     const { title, description, tags } = req.body;
-
-    if (!title || !description)
-      return res.status(400).json({ message: "Title and description are required" });
+    const userId = req.user._id;
 
     const question = await Question.create({
       title,
       description,
       tags,
-      createdBy: req.user._id,
+      createdBy: userId,
     });
 
     res.status(201).json(question);
@@ -21,7 +19,7 @@ export const createQuestion = async (req, res) => {
   }
 };
 
-// GET /questions - get all questions (with search)
+// 📋 Get All (+ search)
 export const getQuestions = async (req, res) => {
   try {
     const search = req.query.search || "";
@@ -37,6 +35,20 @@ export const getQuestions = async (req, res) => {
       .sort({ createdAt: -1 });
 
     res.json(questions);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// 🔍 Get By ID
+export const getQuestionById = async (req, res) => {
+  try {
+    const question = await Question.findById(req.params.id).populate(
+      "createdBy",
+      "name role"
+    );
+    if (!question) return res.status(404).json({ message: "Not found" });
+    res.json(question);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

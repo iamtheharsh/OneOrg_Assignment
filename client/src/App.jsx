@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useContext } from "react";
 import AuthContext from "./context/AuthContext.jsx";
+import ManagerDashboard from "./pages/ManagerDashboard.jsx";
 
 // Pages
 import Login from "./pages/Login.jsx";
@@ -33,6 +34,11 @@ export default function App() {
               <Route path="/feed" element={<QuestionFeed />} />
               <Route path="/ask" element={<AskQuestion />} />
               <Route path="/question/:id" element={<QuestionDetail />} />
+
+              {/* Manager-only route */}
+              {user.role === "manager" && (
+                <Route path="/manager" element={<ManagerDashboard />} />
+              )}
             </>
           )}
 

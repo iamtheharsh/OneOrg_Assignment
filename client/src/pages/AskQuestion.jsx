@@ -1,65 +1,77 @@
+// src/pages/AskQuestion.jsx
 import { useState, useContext } from "react";
 import api from "../utils/api";
-import { AuthContext } from "../context/AuthProvider.jsx";
+import AuthContext from "../context/AuthContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 export default function AskQuestion() {
   const { user } = useContext(AuthContext);
-  const [form, setForm] = useState({ title: "", description: "", tags: "" });
-  const [msg, setMsg] = useState("");
-
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [tags, setTags] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
       await api.post(
         "/questions",
         {
-          title: form.title,
-          description: form.description,
-          tags: form.tags.split(",").map((t) => t.trim()),
+          title,
+          description,
+          tags: tags.split(",").map((tag) => tag.trim()),
         },
         {
           headers: { Authorization: `Bearer ${user.token}` },
         }
       );
-      setMsg("✅ Question posted successfully!");
-      setForm({ title: "", description: "", tags: "" });
+
+      navigate("/feed");
     } catch (err) {
-      setMsg("❌ " + err.response.data.message);
+      console.error("Error posting question:", err.response?.data || err.message);
+      alert("Failed to post question. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 text-eggplant">
-      <h1 className="text-3xl font-bold mb-4">Ask a Question</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-96">
+    <div className="p-6 max-w-2xl mx-auto bg-lavender rounded shadow">
+      <h1 className="text-3xl font-bold mb-4 text-center">Ask a Question</h1>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
-          name="title"
-          value={form.title}
-          placeholder="Title"
-          onChange={handleChange}
-          className="p-2 rounded"
+          type="text"
+          placeholder="Question title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="p-2 border rounded"
+          required
         />
         <textarea
-          name="description"
-          value={form.description}
-          placeholder="Description"
-          onChange={handleChange}
-          className="p-2 rounded"
+          placeholder="Describe your question..."
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="p-2 border rounded h-32"
+          required
         />
         <input
-          name="tags"
-          value={form.tags}
+          type="text"
           placeholder="Tags (comma separated)"
-          onChange={handleChange}
-          className="p-2 rounded"
+          value={tags}
+          onChange={(e) => setTags(e.target.value)}
+          className="p-2 border rounded"
         />
-        <button className="bg-eggplant text-white p-2 rounded hover:bg-dimgray">
-          Post Question
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-eggplant text-pearl py-2 rounded hover:bg-pearl hover:text-eggplant transition"
+        >
+          {loading ? "Posting..." : "Post Question"}
         </button>
       </form>
-      <p className="mt-3">{msg}</p>
     </div>
   );
 }
