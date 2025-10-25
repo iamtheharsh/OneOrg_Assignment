@@ -14,6 +14,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173",
+  "https://reliable-bombolone-1f560e.netlify.app", // ✅ your Netlify frontend URL
   "https://oneorgfrontend.vercel.app", // your frontend
 ];
 
