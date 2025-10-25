@@ -1,75 +1,120 @@
-import { useEffect, useState, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import api from "../utils/api";
 import AuthContext from "../context/AuthContext.jsx";
 
 export default function ManagerDashboard() {
   const { user } = useContext(AuthContext);
   const [insights, setInsights] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [questionId, setQuestionId] = useState("");
+  const [summary, setSummary] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [questions, setQuestions] = useState([]);
+
+  const fetchInsights = async () => {
+    try {
+      const { data } = await api.get("/insights", {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      setInsights(data);
+    } catch (err) {
+      console.error("Error fetching insights:", err.response?.data || err.message);
+    }
+  };
+
+  const fetchQuestions = async () => {
+    try {
+      const { data } = await api.get("/questions", {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      setQuestions(data);
+      if (data.length > 0) setQuestionId(data[0]._id);
+    } catch (err) {
+      console.error("Error fetching questions:", err.response?.data || err.message);
+    }
+  };
 
   useEffect(() => {
-    const fetchInsights = async () => {
-      try {
-        const { data } = await api.get("/insights", {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-        setInsights(data);
-      } catch (err) {
-        console.error("❌ Error fetching insights:", err.response?.data || err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchInsights();
-  }, [user.token]); // ✅ only depends on token
+    fetchQuestions();
+  }, []);
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center h-64">
-        <p className="text-dimgray animate-pulse">Loading manager dashboard...</p>
-      </div>
-    );
-
-  if (insights.length === 0)
-    return (
-      <div className="p-6 text-center text-dimgray italic">
-        No insights found yet.
-      </div>
-    );
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!questionId || !summary.trim()) {
+      alert("Please select a question and write a summary.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await api.post(
+        "/insights",
+        { questionId, summary },
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+      setSummary("");
+      fetchInsights();
+    } catch (err) {
+      alert(err.response?.data?.message || "Error creating insight");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold text-center mb-6">Manager Dashboard</h1>
+    <div className="p-6 max-w-3xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-center">Manager Insights</h1>
 
-      <div className="overflow-x-auto">
-        <table className="w-full border border-gray-300 rounded-lg shadow-sm bg-pearl">
-          <thead className="bg-eggplant text-pearl">
-            <tr>
-              <th className="p-3 text-left">Question</th>
-              <th className="p-3 text-left">Insight Summary</th>
-              <th className="p-3 text-left">Manager</th>
-              <th className="p-3 text-left">Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {insights.map((i) => (
-              <tr key={i._id} className="border-b border-gray-200 hover:bg-lavender">
-                <td className="p-3 w-1/3">
-                  <p className="font-medium text-eggplant">{i.questionId?.title}</p>
-                  <p className="text-xs text-dimgray truncate">
-                    {i.questionId?.description}
-                  </p>
-                </td>
-                <td className="p-3 italic text-sm">"{i.summary}"</td>
-                <td className="p-3 text-sm">{i.createdBy?.name || "Unknown"}</td>
-                <td className="p-3 text-xs text-dimgray">
-                  {new Date(i.createdAt).toLocaleString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <form
+        onSubmit={handleSubmit}
+        className="bg-lavender p-4 rounded mb-6 flex flex-col gap-3"
+      >
+        <label className="font-semibold text-sm">Select Question</label>
+        <select
+          value={questionId}
+          onChange={(e) => setQuestionId(e.target.value)}
+          className="p-2 rounded border"
+        >
+          {questions.length === 0 ? (
+            <option>No questions available</option>
+          ) : (
+            questions.map((q) => (
+              <option key={q._id} value={q._id}>
+                {q.title || "Untitled Question"}
+              </option>
+            ))
+          )}
+        </select>
+
+        <textarea
+          value={summary}
+          onChange={(e) => setSummary(e.target.value)}
+          placeholder="Write your insight summary..."
+          className="p-2 rounded border h-24"
+        />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-eggplant text-white p-2 rounded hover:bg-dimgray transition"
+        >
+          {loading ? "Adding..." : "Add Insight"}
+        </button>
+      </form>
+
+      <div className="flex flex-col gap-4">
+        {insights.length === 0 ? (
+          <p className="text-center text-dimgray">No insights yet.</p>
+        ) : (
+          insights.map((i) => (
+            <div key={i._id} className="p-4 bg-pearl rounded shadow">
+              <h2 className="font-semibold text-lg">{i.questionId?.title}</h2>
+              <p className="text-sm mt-1">{i.summary}</p>
+              <p className="text-xs mt-2 text-dimgray">
+                By {i.createdBy?.name} ({i.createdBy?.role})
+              </p>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

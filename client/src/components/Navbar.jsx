@@ -14,7 +14,10 @@ export default function Navbar() {
 
   return (
     <nav className="bg-eggplant text-pearl px-6 py-3 flex justify-between items-center shadow">
-      <Link to={user ? "/feed" : "/"} className="text-2xl font-bold tracking-wide">
+      <Link
+        to={user ? "/feed" : "/"}
+        className="text-2xl font-bold tracking-wide"
+      >
         QnA Forum
       </Link>
 
@@ -26,6 +29,17 @@ export default function Navbar() {
           >
             Ask Question
           </Link>
+
+          {/* Manager-only Insights button */}
+          {user.role === "manager" && (
+            <Link
+              to="/insights"
+              className="bg-pearl text-eggplant px-4 py-1 rounded hover:bg-lavender transition"
+            >
+              Insights
+            </Link>
+          )}
+
           <button
             onClick={handleLogout}
             className="border border-pearl px-3 py-1 rounded hover:bg-lavender hover:text-eggplant transition"
