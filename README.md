@@ -19,22 +19,27 @@ Auth: JWT-based Authentication & Role Authorization
 📂 Folder Structure
 OneOrg_Assignment/
 │
-├── client/                # React Frontend
-│   ├── src/
-│   │   ├── pages/         # Feed, AskQuestion, QuestionDetail, ManagerDashboard
-│   │   ├── components/    # Navbar, etc.
-│   │   ├── context/       # AuthContext + Provider
-│   │   └── utils/api.js   # Axios API instance
+├── client/ # 🎨 React Frontend (Vite)
+│ ├── src/
+│ │ ├── pages/ # Page components (Feed, AskQuestion, QuestionDetail, ManagerDashboard)
+│ │ ├── components/ # Reusable UI components (Navbar, etc.)
+│ │ ├── context/ # Auth context and provider
+│ │ ├── utils/ # Axios setup and API helper
+│ │ └── assets/ # Static assets if any (images, icons)
+│ ├── index.html # Root HTML
+│ └── package.json # Frontend dependencies
 │
-├── server/                # Node.js Backend
-│   ├── src/
-│   │   ├── models/        # MongoDB Schemas (User, Question, Answer, Insight)
-│   │   ├── controllers/   # Route Logic
-│   │   ├── routes/        # API Routes
-│   │   ├── middleware/    # Auth + Role Middleware
-│   │   └── config/db.js   # MongoDB Connection
-│
-└── README.md
+├── server/ # ⚙️ Express Backend
+│ ├── src/
+│ │ ├── config/ # Database connection (db.js)
+│ │ ├── controllers/ # Route handlers (auth, questions, answers, insights)
+│ │ ├── models/ # Mongoose schemas (User, Question, Answer, Insight)
+│ │ ├── routes/ # Express route definitions
+│ │ ├── middleware/ # JWT auth and role-based protection
+│ │ └── utils/ # Error handling utilities
+│ ├── package.json # Backend dependencies
+│ └── .env.example # Environment variables (PORT, MONGO_URI, JWT_SECRET)
+
 
 🧩 Features
 | Feature                         | Member | Manager |
