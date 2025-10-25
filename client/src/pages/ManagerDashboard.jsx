@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import api from "../utils/api";
 import AuthContext from "../context/AuthContext.jsx";
 
@@ -10,7 +10,7 @@ export default function ManagerDashboard() {
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState([]);
 
-  const fetchInsights = async () => {
+  const fetchInsights = useCallback(async () => {
     try {
       const { data } = await api.get("/insights", {
         headers: { Authorization: `Bearer ${user.token}` },
@@ -19,9 +19,9 @@ export default function ManagerDashboard() {
     } catch (err) {
       console.error("Error fetching insights:", err.response?.data || err.message);
     }
-  };
+  }, [user.token]);
 
-  const fetchQuestions = async () => {
+  const fetchQuestions = useCallback(async () => {
     try {
       const { data } = await api.get("/questions", {
         headers: { Authorization: `Bearer ${user.token}` },
@@ -31,12 +31,12 @@ export default function ManagerDashboard() {
     } catch (err) {
       console.error("Error fetching questions:", err.response?.data || err.message);
     }
-  };
+  }, [user.token]);
 
   useEffect(() => {
     fetchInsights();
     fetchQuestions();
-  }, []);
+  }, [fetchInsights, fetchQuestions]); // ✅ now valid dependencies
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,7 +52,7 @@ export default function ManagerDashboard() {
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
       setSummary("");
-      fetchInsights();
+      fetchInsights(); // safely re-fetch
     } catch (err) {
       alert(err.response?.data?.message || "Error creating insight");
     } finally {
