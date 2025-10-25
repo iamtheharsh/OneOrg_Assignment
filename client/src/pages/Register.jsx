@@ -2,7 +2,12 @@ import { useState } from "react";
 import api from "../utils/api";
 
 export default function Register() {
-  const [form, setForm] = useState({ name: "", email: "", password: "", role: "member" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "member",
+  });
   const [msg, setMsg] = useState("");
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -14,7 +19,7 @@ export default function Register() {
       const { data } = await api.post("/auth/register", form);
       setMsg("✅ Registered successfully! You can now log in.");
     } catch (err) {
-      setMsg("❌ " + err.response.data.message);
+      setMsg("❌ " + (err.response?.data?.message || "Registration failed"));
     }
   };
 
@@ -22,16 +27,47 @@ export default function Register() {
     <div className="flex flex-col items-center justify-center h-screen text-eggplant">
       <h1 className="text-3xl mb-4 font-bold">Register</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-80">
-        <input name="name" placeholder="Name" onChange={handleChange} className="p-2 rounded" />
-        <input name="email" placeholder="Email" onChange={handleChange} className="p-2 rounded" />
-        <input name="password" placeholder="Password" type="password" onChange={handleChange} className="p-2 rounded" />
+        <input
+          name="name"
+          placeholder="Name"
+          onChange={handleChange}
+          className="p-2 rounded"
+        />
+        <input
+          name="email"
+          placeholder="Email"
+          onChange={handleChange}
+          className="p-2 rounded"
+        />
+        <input
+          name="password"
+          placeholder="Password"
+          type="password"
+          onChange={handleChange}
+          className="p-2 rounded"
+        />
         <select name="role" onChange={handleChange} className="p-2 rounded">
           <option value="member">Member</option>
           <option value="manager">Manager</option>
         </select>
-        <button className="bg-eggplant text-white p-2 rounded hover:bg-dimgray">Register</button>
+        <button className="bg-eggplant text-white p-2 rounded hover:bg-dimgray">
+          Register
+        </button>
       </form>
       <p className="mt-3">{msg}</p>
+
+      {/* 👇 Added login link */}
+      <div className="mt-4 flex justify-center">
+        <p className="text-sm text-dimgray">
+          Already have an account?{" "}
+          <a
+            href="/login"
+            className="text-eggplant font-semibold hover:underline"
+          >
+            Login here
+          </a>
+        </p>
+      </div>
     </div>
   );
 }
