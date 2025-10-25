@@ -15,7 +15,7 @@ const app = express();
 // ✅ Adjust this to allow both local & deployed frontend
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://oneorg-frontend.vercel.app", // frontend deploy URL (replace after deploy)
+  "https://oneorgfrontend.vercel.app", // frontend deploy URL (replace after deploy)
 ];
 
 app.use(
