@@ -1,22 +1,10 @@
-// src/routes/insightRoutes.js
 import express from "express";
-import {
-  createInsight,
-  getInsightsByQuestion,
-  getAllInsights,
-} from "../controllers/insightController.js";
-import { protect } from "../middleware/authMiddleware.js";
-import { authorizeRoles } from "../middleware/roleMiddleware.js";
+import { createInsight, getAllInsights } from "../controllers/insightController.js";
+import { protect, managerOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Manager dashboard (all insights)
-router.get("/", protect, authorizeRoles("manager"), getAllInsights);
-
-// Insights for a specific question (any authenticated user)
-router.get("/:questionId", protect, getInsightsByQuestion);
-
-// Create insight (manager only)
-router.post("/", protect, authorizeRoles("manager"), createInsight);
+router.post("/", protect, managerOnly, createInsight);
+router.get("/", protect, managerOnly, getAllInsights);
 
 export default router;

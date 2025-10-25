@@ -1,3 +1,126 @@
+// import { useState, useEffect, useContext, useCallback } from "react";
+// import api from "../utils/api";
+// import AuthContext from "../context/AuthContext.jsx";
+
+// export default function ManagerDashboard() {
+//   const { user } = useContext(AuthContext);
+//   const [insights, setInsights] = useState([]);
+//   const [questionId, setQuestionId] = useState("");
+//   const [summary, setSummary] = useState("");
+//   const [loading, setLoading] = useState(false);
+//   const [questions, setQuestions] = useState([]);
+
+//   const fetchInsights = useCallback(async () => {
+//     try {
+//       const { data } = await api.get("/insights", {
+//         headers: { Authorization: `Bearer ${user.token}` },
+//       });
+//       setInsights(data);
+//     } catch (err) {
+//       console.error("Error fetching insights:", err.response?.data || err.message);
+//     }
+//   }, [user.token]);
+
+//   const fetchQuestions = useCallback(async () => {
+//     try {
+//       const { data } = await api.get("/questions", {
+//         headers: { Authorization: `Bearer ${user.token}` },
+//       });
+//       setQuestions(data);
+//       if (data.length > 0) setQuestionId(data[0]._id);
+//     } catch (err) {
+//       console.error("Error fetching questions:", err.response?.data || err.message);
+//     }
+//   }, [user.token]);
+
+//   useEffect(() => {
+//     fetchInsights();
+//     fetchQuestions();
+//   }, [fetchInsights, fetchQuestions]); // ✅ now valid dependencies
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     if (!questionId || !summary.trim()) {
+//       alert("Please select a question and write a summary.");
+//       return;
+//     }
+//     setLoading(true);
+//     try {
+//       await api.post(
+//         "/insights",
+//         { questionId, summary },
+//         { headers: { Authorization: `Bearer ${user.token}` } }
+//       );
+//       setSummary("");
+//       fetchInsights(); // safely re-fetch
+//     } catch (err) {
+//       alert(err.response?.data?.message || "Error creating insight");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="p-6 max-w-3xl mx-auto">
+//       <h1 className="text-3xl font-bold mb-6 text-center">Manager Insights</h1>
+
+//       <form
+//         onSubmit={handleSubmit}
+//         className="bg-lavender p-4 rounded mb-6 flex flex-col gap-3"
+//       >
+//         <label className="font-semibold text-sm">Select Question</label>
+//         <select
+//           value={questionId}
+//           onChange={(e) => setQuestionId(e.target.value)}
+//           className="p-2 rounded border"
+//         >
+//           {questions.length === 0 ? (
+//             <option>No questions available</option>
+//           ) : (
+//             questions.map((q) => (
+//               <option key={q._id} value={q._id}>
+//                 {q.title || "Untitled Question"}
+//               </option>
+//             ))
+//           )}
+//         </select>
+
+//         <textarea
+//           value={summary}
+//           onChange={(e) => setSummary(e.target.value)}
+//           placeholder="Write your insight summary..."
+//           className="p-2 rounded border h-24"
+//         />
+
+//         <button
+//           type="submit"
+//           disabled={loading}
+//           className="bg-eggplant text-white p-2 rounded hover:bg-dimgray transition"
+//         >
+//           {loading ? "Adding..." : "Add Insight"}
+//         </button>
+//       </form>
+
+//       <div className="flex flex-col gap-4">
+//         {insights.length === 0 ? (
+//           <p className="text-center text-dimgray">No insights yet.</p>
+//         ) : (
+//           insights.map((i) => (
+//             <div key={i._id} className="p-4 bg-pearl rounded shadow">
+//               <h2 className="font-semibold text-lg">{i.questionId?.title}</h2>
+//               <p className="text-sm mt-1">{i.summary}</p>
+//               <p className="text-xs mt-2 text-dimgray">
+//                 By {i.createdBy?.name} ({i.createdBy?.role})
+//               </p>
+//             </div>
+//           ))
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+
+
 import { useState, useEffect, useContext, useCallback } from "react";
 import api from "../utils/api";
 import AuthContext from "../context/AuthContext.jsx";
@@ -10,6 +133,7 @@ export default function ManagerDashboard() {
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState([]);
 
+  // ✅ Stable callback for fetching insights
   const fetchInsights = useCallback(async () => {
     try {
       const { data } = await api.get("/insights", {
@@ -17,33 +141,39 @@ export default function ManagerDashboard() {
       });
       setInsights(data);
     } catch (err) {
-      console.error("Error fetching insights:", err.response?.data || err.message);
+      console.error("Error fetching insights:", err);
     }
   }, [user.token]);
 
+  // ✅ Stable callback for fetching questions
   const fetchQuestions = useCallback(async () => {
     try {
       const { data } = await api.get("/questions", {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       setQuestions(data);
-      if (data.length > 0) setQuestionId(data[0]._id);
+      // Automatically select the first question if none selected yet
+      if (data.length > 0 && !questionId) {
+        setQuestionId(data[0]._id);
+      }
     } catch (err) {
-      console.error("Error fetching questions:", err.response?.data || err.message);
+      console.error("Error fetching questions:", err);
     }
-  }, [user.token]);
+  }, [user.token, questionId]);
 
+  // ✅ Effect runs only once when component mounts
   useEffect(() => {
     fetchInsights();
     fetchQuestions();
-  }, [fetchInsights, fetchQuestions]); // ✅ now valid dependencies
+  }, [fetchInsights, fetchQuestions]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!questionId || !summary.trim()) {
-      alert("Please select a question and write a summary.");
+    if (!summary.trim()) {
+      alert("Please write an insight before adding.");
       return;
     }
+
     setLoading(true);
     try {
       await api.post(
@@ -52,21 +182,22 @@ export default function ManagerDashboard() {
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
       setSummary("");
-      fetchInsights(); // safely re-fetch
+      await fetchInsights(); // refresh list after adding
     } catch (err) {
-      alert(err.response?.data?.message || "Error creating insight");
+      alert(err.response?.data?.message || "Error adding insight");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-6 max-w-3xl mx-auto text-eggplant">
       <h1 className="text-3xl font-bold mb-6 text-center">Manager Insights</h1>
 
+      {/* 🔹 Form to Add Insight */}
       <form
         onSubmit={handleSubmit}
-        className="bg-lavender p-4 rounded mb-6 flex flex-col gap-3"
+        className="bg-lavender p-4 rounded mb-6 flex flex-col gap-3 shadow"
       >
         <label className="font-semibold text-sm">Select Question</label>
         <select
@@ -95,21 +226,29 @@ export default function ManagerDashboard() {
         <button
           type="submit"
           disabled={loading}
-          className="bg-eggplant text-white p-2 rounded hover:bg-dimgray transition"
+          className={`bg-eggplant text-pearl p-2 rounded font-semibold transition-all ${
+            loading ? "opacity-70 cursor-not-allowed" : "hover:bg-dimgray"
+          }`}
         >
-          {loading ? "Adding..." : "Add Insight"}
+          {loading ? "Adding..." : "➕ Add Insight"}
         </button>
       </form>
 
+      {/* 🔹 List of Insights */}
       <div className="flex flex-col gap-4">
         {insights.length === 0 ? (
           <p className="text-center text-dimgray">No insights yet.</p>
         ) : (
           insights.map((i) => (
-            <div key={i._id} className="p-4 bg-pearl rounded shadow">
-              <h2 className="font-semibold text-lg">{i.questionId?.title}</h2>
-              <p className="text-sm mt-1">{i.summary}</p>
-              <p className="text-xs mt-2 text-dimgray">
+            <div
+              key={i._id}
+              className="p-4 bg-pearl rounded shadow-sm border border-lavender"
+            >
+              <h2 className="font-semibold text-lg mb-1">
+                {i.questionId?.title || "Untitled Question"}
+              </h2>
+              <p className="text-sm">{i.summary}</p>
+              <p className="text-xs mt-1 text-dimgray">
                 By {i.createdBy?.name} ({i.createdBy?.role})
               </p>
             </div>

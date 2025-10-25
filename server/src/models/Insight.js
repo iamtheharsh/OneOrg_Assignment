@@ -1,24 +1,11 @@
 import mongoose from "mongoose";
 
-const insightSchema = new mongoose.Schema(
-  {
-    questionId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Question",
-      required: true,
-    },
-    summary: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-  },
-  { timestamps: true }
-);
+const insightSchema = new mongoose.Schema({
+  questionId: { type: mongoose.Schema.Types.ObjectId, ref: "Question", required: true },
+  summary: { type: String, required: true }, // ✅ consistent with frontend
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  createdAt: { type: Date, default: Date.now },
+});
 
-export default mongoose.model("Insight", insightSchema);
+const Insight = mongoose.model("Insight", insightSchema);
+export default Insight;
