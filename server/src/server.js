@@ -14,11 +14,11 @@ const app = express();
 
 // ✅ Allowed frontend origins
 const allowedOrigins = [
-  "http://localhost:5173",               // for local dev
-  "https://oneorgfrontend.vercel.app",   // your deployed frontend
+  "http://localhost:5173",
+  "https://oneorgfrontend.vercel.app", // your deployed frontend
 ];
 
-// ✅ Robust CORS config for both local + deployed frontend
+// ✅ CORS setup
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -35,25 +35,40 @@ app.use(
   })
 );
 
-// ✅ Parse incoming JSON
+// ✅ Parse JSON
 app.use(express.json());
 
-// ✅ API Routes
+// ✅ Routes
 app.use("/auth", authRoutes);
 app.use("/questions", questionRoutes);
 app.use("/answers", answerRoutes);
 app.use("/insights", insightRoutes);
 
-// ✅ Health check route
+// ✅ Health check
 app.get("/", (req, res) => res.json({ message: "✅ Server running fine" }));
 
-// ✅ Connect to DB before exporting app
-await connectDB(process.env.MONGO_URI);
-
-// ✅ Error handlers
+// ✅ Error handlers (keep these below routes)
 app.use(notFound);
 app.use(errorHandler);
 
-// ❌ DO NOT USE app.listen() on Vercel
-// ✅ Export the app for Vercel serverless function
-export default app;
+// ✅ Initialize DB connection before exporting app
+let isConnected = false;
+
+async function initApp() {
+  if (!isConnected) {
+    try {
+      await connectDB(process.env.MONGO_URI);
+      isConnected = true;
+      console.log("✅ MongoDB connected");
+    } catch (err) {
+      console.error("❌ MongoDB connection failed:", err.message);
+    }
+  }
+  return app;
+}
+
+// ✅ Export async handler for Vercel
+export default async function handler(req, res) {
+  const initializedApp = await initApp();
+  return initializedApp(req, res);
+}
