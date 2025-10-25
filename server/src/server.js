@@ -12,22 +12,21 @@ dotenv.config();
 
 const app = express();
 
-// ✅ FIXED CORS CONFIG
+// ✅ Adjust this to allow both local & deployed frontend
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://oneorg-frontend.vercel.app", // frontend deploy URL (replace after deploy)
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173", // your React dev URL
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
   })
 );
 
-// explicitly handle OPTIONS for preflight
-// app.options("/*", cors());
-
-// middlewares
 app.use(express.json());
 
 // Routes
@@ -36,21 +35,15 @@ app.use("/questions", questionRoutes);
 app.use("/answers", answerRoutes);
 app.use("/insights", insightRoutes);
 
-// Test route
-app.get("/", (req, res) => {
-  res.json({ message: "Server running fine" });
-});
+app.get("/", (req, res) => res.json({ message: "✅ Server running fine" }));
 
-const PORT = process.env.PORT || 8000;
+// connect DB before exporting app
+await connectDB(process.env.MONGO_URI);
 
-(async () => {
-  try {
-    await connectDB(process.env.MONGO_URI);
-    app.use(notFound);
-    app.use(errorHandler);
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-  } catch (err) {
-    console.error("❌ Server startup failed:", err);
-    process.exit(1);
-  }
-})();
+// error handling
+app.use(notFound);
+app.use(errorHandler);
+
+// ❌ Remove app.listen()
+// ✅ Instead export the app for Vercel
+export default app;
