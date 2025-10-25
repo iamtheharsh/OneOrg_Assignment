@@ -31,7 +31,7 @@ export default function QuestionDetail() {
     } finally {
       setLoading(false);
     }
-  }, [id, user.token]); // ✅ dependencies added properly
+  }, [id, user.token]);
 
   // ✅ Effect depends only on fetchData (which depends on id + token)
   useEffect(() => {
@@ -97,7 +97,8 @@ export default function QuestionDetail() {
           >
             <p className="text-sm">{ans.content}</p>
             <p className="text-xs text-dimgray mt-1">
-              By {ans.createdBy?.name} ({ans.createdBy?.role})
+              By {ans.createdBy?.name} ({ans.createdBy?.role}) ·{" "}
+              {new Date(ans.createdAt).toLocaleString()}
             </p>
           </div>
         ))

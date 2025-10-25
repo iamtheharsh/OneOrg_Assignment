@@ -64,7 +64,9 @@ export default function QuestionFeed() {
               <div className="flex justify-between items-start">
                 <div className="flex-1 pr-4">
                   <Link to={`/question/${q._id}`}>
-                    <h2 className="text-xl font-semibold hover:underline">{q.title || "Untitled"}</h2>
+                    <h2 className="text-xl font-semibold hover:underline">
+                      {q.title || "Untitled"}
+                    </h2>
                   </Link>
 
                   <p className="text-sm text-dimgray mt-2">
@@ -75,25 +77,33 @@ export default function QuestionFeed() {
 
                   <div className="flex flex-wrap gap-2 text-sm mt-3">
                     {(q.tags && q.tags.length > 0 ? q.tags : []).map((t, i) => (
-                      <span key={i} className="bg-pearl text-eggplant px-2 py-1 rounded-full">
+                      <span
+                        key={i}
+                        className="bg-pearl text-eggplant px-2 py-1 rounded-full"
+                      >
                         #{t}
                       </span>
                     ))}
                   </div>
                 </div>
 
+                {/* ✅ Updated Section */}
                 <div className="text-right">
                   <p className="text-xs text-dimgray">
                     By {q.createdBy?.name || "Unknown"} ({q.createdBy?.role || "member"})
                   </p>
+                  <p className="text-xs text-dimgray mt-1">
+                    Posted on {new Date(q.createdAt).toLocaleString()}
+                  </p>
 
                   <Link
                     to={`/question/${q._id}`}
-                    className="inline-block mt-4 px-3 py-1 border rounded bg-eggplant text-pearl hover:bg-pearl hover:text-eggplant transition"
+                    className="inline-block mt-3 px-3 py-1 border rounded bg-eggplant text-pearl hover:bg-pearl hover:text-eggplant transition"
                   >
                     View Details
                   </Link>
                 </div>
+                {/* ✅ End Updated Section */}
               </div>
             </div>
           ))}
