@@ -4,10 +4,13 @@
   "version": "0.0.0",
   "type": "module",
 "scripts": {
-  "dev": "npx vite",
-  "build": "npx vite build",
+  "dev": "vite",
+  "build": "vite build --debug",
   "lint": "eslint .",
-  "preview": "npx vite preview"
+  "preview": "vite preview"
+},
+"engines": {
+  "node": "18.x"
 },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.15",
