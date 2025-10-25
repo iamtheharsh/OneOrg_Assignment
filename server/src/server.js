@@ -12,38 +12,48 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Adjust this to allow both local & deployed frontend
+// ✅ Allowed frontend origins
 const allowedOrigins = [
-  "http://localhost:5173",
-  "https://oneorgfrontend.vercel.app", // frontend deploy URL (replace after deploy)
+  "http://localhost:5173",               // for local dev
+  "https://oneorgfrontend.vercel.app",   // your deployed frontend
 ];
 
+// ✅ Robust CORS config for both local + deployed frontend
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log("❌ Blocked by CORS:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
   })
 );
 
+// ✅ Parse incoming JSON
 app.use(express.json());
 
-// Routes
+// ✅ API Routes
 app.use("/auth", authRoutes);
 app.use("/questions", questionRoutes);
 app.use("/answers", answerRoutes);
 app.use("/insights", insightRoutes);
 
+// ✅ Health check route
 app.get("/", (req, res) => res.json({ message: "✅ Server running fine" }));
 
-// connect DB before exporting app
+// ✅ Connect to DB before exporting app
 await connectDB(process.env.MONGO_URI);
 
-// error handling
+// ✅ Error handlers
 app.use(notFound);
 app.use(errorHandler);
 
-// ❌ Remove app.listen()
-// ✅ Instead export the app for Vercel
+// ❌ DO NOT USE app.listen() on Vercel
+// ✅ Export the app for Vercel serverless function
 export default app;
