@@ -9,7 +9,8 @@ export default function Login() {
   const [msg, setMsg] = useState("");
   const navigate = useNavigate();
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,6 +27,7 @@ export default function Login() {
   return (
     <div className="flex flex-col items-center justify-center h-screen text-eggplant">
       <h1 className="text-3xl mb-4 font-bold">Login</h1>
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-80">
         <input
           name="email"
@@ -40,13 +42,22 @@ export default function Login() {
           onChange={handleChange}
           className="p-2 rounded"
         />
-        <button className="bg-eggplant text-white p-2 rounded hover:bg-dimgray">
+
+        {/* ✅ Login button above bottom text */}
+       <button
+          className="inline-flex items-center justify-center rounded-lg border border-gray-300 
+                    bg-white px-4 py-2 text-sm font-medium text-gray-700 
+                    shadow-sm hover:bg-gray-50 hover:shadow-md active:scale-[0.98] 
+                    transition-all duration-200 ease-in-out"
+        >
           Login
         </button>
+
       </form>
+
       <p className="mt-3">{msg}</p>
 
-      {/* 👇 Added register link */}
+      {/* ✅ Bottom navigation text */}
       <div className="mt-4 flex justify-center">
         <p className="text-sm text-dimgray">
           Don’t have an account?{" "}
